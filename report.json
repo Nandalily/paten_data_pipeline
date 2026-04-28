@@ -1,0 +1,139 @@
+{
+    "total_patents": 200000,
+    "top_inventors": [
+        {
+            "name": "Shunpei Yamazaki",
+            "patents": 68
+        },
+        {
+            "name": "Kia Silverbrook",
+            "patents": 47
+        },
+        {
+            "name": "Tao Luo",
+            "patents": 33
+        },
+        {
+            "name": "Jonathan P. Ive",
+            "patents": 32
+        },
+        {
+            "name": "Richard P. Howarth",
+            "patents": 27
+        },
+        {
+            "name": "Kangguo Cheng",
+            "patents": 27
+        },
+        {
+            "name": "Li Zhang",
+            "patents": 25
+        },
+        {
+            "name": "Duncan Robert Kerr",
+            "patents": 25
+        },
+        {
+            "name": "Bartley K. Andre",
+            "patents": 25
+        },
+        {
+            "name": "Wanshi Chen",
+            "patents": 23
+        }
+    ],
+    "top_companies": [
+        {
+            "company_id": "533e0469-baac-46b7-9576-669db08092eb",
+            "total_patents": 4036
+        },
+        {
+            "company_id": "29b8f534-149e-443c-b76b-3c4a222da89c",
+            "total_patents": 3647
+        },
+        {
+            "company_id": "dfdf1f1a-8f22-41dc-a7f0-855bde20ca67",
+            "total_patents": 2081
+        },
+        {
+            "company_id": "55bc7465-2823-418d-9835-41d555c610a6",
+            "total_patents": 1460
+        },
+        {
+            "company_id": "5952964e-63c6-4284-9012-0fdd0643f715",
+            "total_patents": 1276
+        },
+        {
+            "company_id": "4ef2b9c8-d3e7-40d6-ac53-8694d8fe890f",
+            "total_patents": 1208
+        },
+        {
+            "company_id": "55715b8e-9037-47c9-8e27-a2acf13d6047",
+            "total_patents": 1145
+        },
+        {
+            "company_id": "b904f566-62d6-44a5-8689-7b5c5a3a1a19",
+            "total_patents": 1122
+        },
+        {
+            "company_id": "93f8c962-7a18-45c0-b192-7a141f9a8b6c",
+            "total_patents": 1106
+        },
+        {
+            "company_id": "906da649-dd98-4eac-a78c-d5dc3cc385b1",
+            "total_patents": 1099
+        }
+    ],
+    "top_countries": [
+        {
+            "country": "US",
+            "total": 95892
+        },
+        {
+            "country": "JP",
+            "total": 33465
+        },
+        {
+            "country": "DE",
+            "total": 11653
+        },
+        {
+            "country": "KR",
+            "total": 10600
+        },
+        {
+            "country": "CN",
+            "total": 8708
+        },
+        {
+            "country": "TW",
+            "total": 5487
+        },
+        {
+            "country": "GB",
+            "total": 4166
+        },
+        {
+            "country": "FR",
+            "total": 4111
+        },
+        {
+            "country": "CA",
+            "total": 3881
+        },
+        {
+            "country": "IN",
+            "total": 2156
+        }
+    ],
+    "yearly_trends": [
+        {
+            "year": 2018,
+            "patents": 164524
+        },
+        {
+            "year": 2019,
+            "patents": 35476
+        }
+    ]
+}
