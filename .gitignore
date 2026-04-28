@@ -1,0 +1,3 @@
+.virtual_documents/
+**pycache**/
+*.pyc
