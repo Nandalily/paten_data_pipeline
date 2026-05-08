@@ -3,3 +3,6 @@
 *.pyc
 *.zip
 data/raw
+data/
+*.db
+*.csv
