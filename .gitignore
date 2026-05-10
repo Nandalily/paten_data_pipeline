@@ -9,3 +9,4 @@ data/
 data/
 *.db
 *.csv
+data/clean/
