@@ -1,9 +1,8 @@
 __pycache__/
 *.pyc
 *.zip
-
-# Ignore raw/source data only
-data/raw/
-
-# Ignore databases
 *.db
+*.tsv
+data/raw/
+data/clean_backup/
+.virtual_documents/
