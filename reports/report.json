@@ -1,0 +1,365 @@
+{
+  "total_patents": 8531961,
+  "year_range": {
+    "from": 1976,
+    "to": 2025
+  },
+  "top_countries": [
+    {
+      "country": "US",
+      "locations": 28969
+    },
+    {
+      "country": "DE",
+      "locations": 11706
+    },
+    {
+      "country": "FR",
+      "locations": 9782
+    },
+    {
+      "country": "GB",
+      "locations": 5955
+    },
+    {
+      "country": "IT",
+      "locations": 4432
+    },
+    {
+      "country": "CN",
+      "locations": 2988
+    },
+    {
+      "country": "CA",
+      "locations": 2837
+    },
+    {
+      "country": "CH",
+      "locations": 2703
+    },
+    {
+      "country": "IN",
+      "locations": 2485
+    },
+    {
+      "country": "AT",
+      "locations": 2039
+    }
+  ],
+  "patent_trends": [
+    {
+      "year": 1976,
+      "patents": 70199
+    },
+    {
+      "year": 1977,
+      "patents": 65206
+    },
+    {
+      "year": 1978,
+      "patents": 66074
+    },
+    {
+      "year": 1979,
+      "patents": 48839
+    },
+    {
+      "year": 1980,
+      "patents": 61807
+    },
+    {
+      "year": 1981,
+      "patents": 65771
+    },
+    {
+      "year": 1982,
+      "patents": 57874
+    },
+    {
+      "year": 1983,
+      "patents": 56861
+    },
+    {
+      "year": 1984,
+      "patents": 67212
+    },
+    {
+      "year": 1985,
+      "patents": 71665
+    },
+    {
+      "year": 1986,
+      "patents": 70863
+    },
+    {
+      "year": 1987,
+      "patents": 82943
+    },
+    {
+      "year": 1988,
+      "patents": 77936
+    },
+    {
+      "year": 1989,
+      "patents": 95566
+    },
+    {
+      "year": 1990,
+      "patents": 90421
+    },
+    {
+      "year": 1991,
+      "patents": 96561
+    },
+    {
+      "year": 1992,
+      "patents": 97473
+    },
+    {
+      "year": 1993,
+      "patents": 98385
+    },
+    {
+      "year": 1994,
+      "patents": 101695
+    },
+    {
+      "year": 1995,
+      "patents": 101432
+    },
+    {
+      "year": 1996,
+      "patents": 109654
+    },
+    {
+      "year": 1997,
+      "patents": 112020
+    },
+    {
+      "year": 1998,
+      "patents": 147576
+    },
+    {
+      "year": 1999,
+      "patents": 153592
+    },
+    {
+      "year": 2000,
+      "patents": 157595
+    },
+    {
+      "year": 2001,
+      "patents": 166158
+    },
+    {
+      "year": 2002,
+      "patents": 167400
+    },
+    {
+      "year": 2003,
+      "patents": 169077
+    },
+    {
+      "year": 2004,
+      "patents": 164384
+    },
+    {
+      "year": 2005,
+      "patents": 143891
+    },
+    {
+      "year": 2006,
+      "patents": 173822
+    },
+    {
+      "year": 2007,
+      "patents": 157331
+    },
+    {
+      "year": 2008,
+      "patents": 157788
+    },
+    {
+      "year": 2009,
+      "patents": 167463
+    },
+    {
+      "year": 2010,
+      "patents": 219848
+    },
+    {
+      "year": 2011,
+      "patents": 224871
+    },
+    {
+      "year": 2012,
+      "patents": 253633
+    },
+    {
+      "year": 2013,
+      "patents": 278518
+    },
+    {
+      "year": 2014,
+      "patents": 301643
+    },
+    {
+      "year": 2015,
+      "patents": 299382
+    },
+    {
+      "year": 2016,
+      "patents": 304126
+    },
+    {
+      "year": 2017,
+      "patents": 320003
+    },
+    {
+      "year": 2018,
+      "patents": 308853
+    },
+    {
+      "year": 2019,
+      "patents": 355923
+    },
+    {
+      "year": 2020,
+      "patents": 353701
+    },
+    {
+      "year": 2021,
+      "patents": 329097
+    },
+    {
+      "year": 2022,
+      "patents": 324698
+    },
+    {
+      "year": 2023,
+      "patents": 313707
+    },
+    {
+      "year": 2024,
+      "patents": 325602
+    },
+    {
+      "year": 2025,
+      "patents": 325822
+    }
+  ],
+  "top_by_claims": [
+    {
+      "patent_id": "6684189",
+      "title": "Apparatus and method using front-end network gatew",
+      "num_claims": 887,
+      "year": 2004,
+      "rank": 1
+    },
+    {
+      "patent_id": "5095054",
+      "title": "Polymer compositions containing destructurized sta",
+      "num_claims": 868,
+      "year": 1992,
+      "rank": 2
+    },
+    {
+      "patent_id": "7096160",
+      "title": "System and method for measuring and monitoring wir",
+      "num_claims": 803,
+      "year": 2006,
+      "rank": 3
+    },
+    {
+      "patent_id": "7970722",
+      "title": "System, method and computer program product for a ",
+      "num_claims": 760,
+      "year": 2011,
+      "rank": 4
+    },
+    {
+      "patent_id": "4085139",
+      "title": "2-Decarboxy-2-amino-methyl-PGE and PGD analogs",
+      "num_claims": 706,
+      "year": 1978,
+      "rank": 5
+    },
+    {
+      "patent_id": "6708385",
+      "title": "Flexible manufacturing systems and methods",
+      "num_claims": 694,
+      "year": 2004,
+      "rank": 6
+    },
+    {
+      "patent_id": "6077692",
+      "title": "Keratinocyte growth factor-2",
+      "num_claims": 683,
+      "year": 2000,
+      "rank": 7
+    },
+    {
+      "patent_id": "8060169",
+      "title": "Superconductive compounds having high transition t",
+      "num_claims": 679,
+      "year": 2011,
+      "rank": 8
+    },
+    {
+      "patent_id": "8694657",
+      "title": "Real time communications system",
+      "num_claims": 671,
+      "year": 2014,
+      "rank": 9
+    },
+    {
+      "patent_id": "6317592",
+      "title": "Electronic mail system with RF communications to m",
+      "num_claims": 665,
+      "year": 2001,
+      "rank": 10
+    }
+  ],
+  "top_gov_agencies": [
+    {
+      "gi_statement": "The invention described herein may be manufactured and used by or for the Government of the United States of America for governmental purposes without the payment of any royalties thereon or therefor.",
+      "count": 2195
+    },
+    {
+      "gi_statement": "The invention described herein may be manufactured and used by or for the Government for governmental purposes without the payment of any royalty thereon.",
+      "count": 1810
+    },
+    {
+      "gi_statement": "The invention described herein may be manufactured and used by or for the Government of the United States for all governmental purposes without the payment of any royalty.",
+      "count": 1332
+    },
+    {
+      "gi_statement": "The United States Government has rights in this invention pursuant to Contract No. W-7405-ENG-48 between the United States Department of Energy and the University of California for the operation of Lawrence Livermore National Laboratory.",
+      "count": 1007
+    },
+    {
+      "gi_statement": "RIGHTS OF THE GOVERNMENT The invention described herein may be manufactured and used by or for the Government of the United States for all governmental purposes without the payment of any royalty.",
+      "count": 407
+    },
+    {
+      "gi_statement": "STATEMENT REGARDING FEDERALLY SPONSORED RESEARCH OR DEVELOPMENT The invention described herein may be manufactured and used by or for the government of the United States of America for governmental purposes without the payment of any royalties thereon or therefor.",
+      "count": 303
+    },
+    {
+      "gi_statement": "The invention described herein may be manufactured, used, and licensed by or for the Government for governmental purposes without the payment to me of any royalties thereon.",
+      "count": 300
+    },
+    {
+      "gi_statement": "STATEMENT OF GOVERNMENT INTEREST The invention described herein may be manufactured and used by or for the Government of the United States of America for governmental purposes without the payment of any royalties thereon or therefor.",
+      "count": 284
+    },
+    {
+      "gi_statement": "The invention described herein may be manufactured and used by or for the Government of the United States of America for governmental purposes without the payment of any royalties thereon or therefore.",
+      "count": 282
+    },
+    {
+      "gi_statement": "The invention described herein was made in the performance of work under a NASA contract and is subject to the provisions of Section 305 of the National Aeronautics and Space Act of 1958, Public Law 85-568 (72 Stat. 435; 42 USC 2457).",
+      "count": 273
+    }
+  ]
+}

@@ -1,13 +1,8 @@
-# cat > app.py << 'EOF'
 import streamlit as st
 import sqlite3
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-import json
 import os
-# if not os.path.exists("patents.db"):
-#     import etl  # or subprocess.run(["python", "etl.py"])
 
 st.set_page_config(
     page_title="Global Patent Intelligence",
@@ -15,61 +10,74 @@ st.set_page_config(
     layout="wide"
 )
 
-# @st.cache_resource
-# def get_conn():
-#     return sqlite3.connect('patents.db', check_same_thread=False)
+# ── Build DB from CSVs on cold start ─────────────────────
+DB_PATH = "patents.db"
 
-# @st.cache_data
-# def query(sql):
-#     return pd.read_sql(sql, get_conn())
-@st.cache_data
-def load_data():
-    patents    = pd.read_csv("data/clean/clean_patents.csv")
-    locations  = pd.read_csv("data/clean/clean_locations.csv")
-    gov        = pd.read_csv("data/clean/clean_gov_interest.csv")
-    contracts  = pd.read_csv("data/clean/clean_contracts.csv")
-    return patents, locations, gov, contracts
+@st.cache_resource
+def get_conn():
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL")
 
-patents_df, locations_df, gov_df, contracts_df = load_data()
+    # Create and load tables if empty
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS contracts (
+            patent_id TEXT, contract_award_number TEXT
+        );
+        CREATE TABLE IF NOT EXISTS gov_interest (
+            patent_id TEXT, gi_statement TEXT
+        );
+        CREATE TABLE IF NOT EXISTS locations (
+            location_id TEXT, country TEXT, city TEXT, state TEXT
+        );
+    """)
 
-# Lightweight in-memory SQL via DuckDB
-import duckdb
+    # Load CSVs only if tables are empty
+    cur = conn.cursor()
+    for table, path in [
+        ("contracts",    "data/clean/clean_contracts.csv"),
+        ("gov_interest", "data/clean/clean_gov_interest.csv"),
+        ("locations",    "data/clean/clean_locations.csv"),
+    ]:
+        count = cur.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        if count == 0 and os.path.exists(path):
+            df = pd.read_csv(path)
+            df.to_sql(table, conn, if_exists="replace", index=False)
+    conn.commit()
+    return conn
 
 @st.cache_data
 def query(sql):
-    return duckdb.query(sql).df()
+    return pd.read_sql(sql, get_conn())
 
 # ── Header ────────────────────────────────────────────────
-st.title("Global Patent Intelligence")
-st.caption("Chunked ETL from USPTO PatentsView · SQL analytics · Built for exploration and demos.")
+st.title("🔬 Global Patent Intelligence")
+st.caption("USPTO PatentsView · SQL analytics · Built for exploration and demos.")
 
 # ── Metric cards ──────────────────────────────────────────
-total_patents  = query("SELECT COUNT(*) as n FROM patents").iloc[0,0]
-total_locs     = query("SELECT COUNT(*) as n FROM locations").iloc[0,0]
-total_gov      = query("SELECT COUNT(*) as n FROM gov_interest").iloc[0,0]
-total_contracts= query("SELECT COUNT(*) as n FROM contracts").iloc[0,0]
-total_countries= query("SELECT COUNT(DISTINCT country) as n FROM locations WHERE country IS NOT NULL").iloc[0,0]
-with_claims    = query("SELECT COUNT(*) as n FROM patents WHERE num_claims IS NOT NULL").iloc[0,0]
+total_contracts  = query("SELECT COUNT(*) as n FROM contracts").iloc[0,0]
+total_gov        = query("SELECT COUNT(*) as n FROM gov_interest").iloc[0,0]
+total_locs       = query("SELECT COUNT(*) as n FROM locations").iloc[0,0]
+total_countries  = query("SELECT COUNT(DISTINCT country) as n FROM locations WHERE country IS NOT NULL").iloc[0,0]
+unique_patents   = query("SELECT COUNT(DISTINCT patent_id) as n FROM gov_interest").iloc[0,0]
+unique_contracts = query("SELECT COUNT(DISTINCT contract_award_number) as n FROM contracts").iloc[0,0]
 
 c1,c2,c3,c4,c5,c6 = st.columns(6)
-c1.metric("Patents",      f"{total_patents:,}")
-c2.metric("Locations",    f"{total_locs:,}")
-c3.metric("Countries",    f"{total_countries:,}")
-c4.metric("Gov Interest", f"{total_gov:,}")
-c5.metric("Contracts",    f"{total_contracts:,}")
-c6.metric("With Claims",  f"{with_claims:,}")
+c1.metric("Gov Interest Records", f"{total_gov:,}")
+c2.metric("Unique Patents",        f"{unique_patents:,}")
+c3.metric("Contracts",             f"{total_contracts:,}")
+c4.metric("Unique Contract IDs",   f"{unique_contracts:,}")
+c5.metric("Locations",             f"{total_locs:,}")
+c6.metric("Countries",             f"{total_countries:,}")
 
 st.divider()
 
 # ── Tabs ──────────────────────────────────────────────────
-tab1,tab2,tab3,tab4,tab5,tab6,tab7 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📊 Overview",
-    "🔍 Patent search",
     "🌍 Countries",
-    "📈 Trends",
-    "🏛 Gov interest",
-    "🏆 Top patents",
-    "💻 SQL demos (Q1–Q7)"
+    "🏛 Gov Interest",
+    "📋 Contracts",
+    "💻 SQL Demos"
 ])
 
 # ── Tab 1: Overview ───────────────────────────────────────
@@ -77,77 +85,36 @@ with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("What you are looking at")
+        st.subheader("About this dataset")
         st.markdown("""
-        - **Patents** are utility patents from USPTO PatentsView (2018 sample)
-        - **Locations** come from the disambiguated location table with country/city/state
-        - **Gov interest** records patents with US government funding or rights
-        - **Contracts** link patents to specific government contract award numbers
-        - Tabs to the right drill into countries, trends, rankings and SQL demos (Q1–Q7)
+        - **Gov Interest** — patents with US government funding or rights
+        - **Contracts** — patent links to government contract award numbers
+        - **Locations** — disambiguated inventor locations with country/city/state
         """)
-        st.subheader("Data files loaded")
-        files = {
-            "g_patent.tsv.zip": f"{total_patents:,} patents",
-            "g_location_disambiguated.tsv.zip": f"{total_locs:,} locations",
-            "g_gov_interest.tsv.zip": f"{total_gov:,} records",
-            "g_gov_interest_contracts.tsv.zip": f"{total_contracts:,} contracts",
-            "g_patent_abstract.tsv.zip": "⏳ uploading",
-            "g_persistent_inventor.tsv.zip": "⏳ pending",
-            "g_persistent_assignee.tsv.zip": "⏳ pending",
-        }
-        for fname, status in files.items():
-            st.markdown(f"- `{fname}` — {status}")
+        st.subheader("Files loaded")
+        st.markdown(f"""
+        - `clean_gov_interest.csv` — {total_gov:,} records
+        - `clean_contracts.csv` — {total_contracts:,} records
+        - `clean_locations.csv` — {total_locs:,} locations
+        """)
 
     with col2:
-        st.subheader("Quick trend preview")
-        trends = query("""
-            SELECT year, COUNT(*) as patents
-            FROM patents GROUP BY year ORDER BY year
+        st.subheader("Top 10 countries by inventor locations")
+        top_countries = query("""
+            SELECT country, COUNT(*) as locations
+            FROM locations
+            WHERE country IS NOT NULL AND country != ''
+            GROUP BY country ORDER BY locations DESC LIMIT 10
         """)
-        fig = px.line(trends, x='year', y='patents',
-                      markers=True,
-                      labels={'patents':'Patents granted','year':'Year'})
-        fig.update_layout(margin=dict(l=0,r=0,t=10,b=0), height=300)
+        fig = px.bar(top_countries, x='country', y='locations',
+                     color='locations', color_continuous_scale='Blues',
+                     labels={'country':'Country','locations':'Locations'})
+        fig.update_layout(margin=dict(l=0,r=0,t=10,b=0), height=350)
         st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Patent types")
-        types = query("""
-            SELECT patent_type, COUNT(*) as count
-            FROM patents GROUP BY patent_type ORDER BY count DESC
-        """)
-        fig2 = px.bar(types, x='patent_type', y='count',
-                      labels={'patent_type':'Type','count':'Count'})
-        fig2.update_layout(margin=dict(l=0,r=0,t=10,b=0), height=250)
-        st.plotly_chart(fig2, use_container_width=True)
-
-# ── Tab 2: Patent search ──────────────────────────────────
+# ── Tab 2: Countries ──────────────────────────────────────
 with tab2:
-    st.subheader("Search patents")
-    col1, col2 = st.columns([3,1])
-    with col1:
-        keyword = st.text_input("Search in title", placeholder="e.g. machine learning, battery, sensor")
-    with col2:
-        limit = st.selectbox("Results", [10, 25, 50, 100], index=0)
-
-    if keyword:
-        results = query(f"""
-            SELECT patent_id, title, filing_date, year, num_claims
-            FROM patents
-            WHERE LOWER(title) LIKE LOWER('%{keyword}%')
-            ORDER BY num_claims DESC
-            LIMIT {limit}
-        """)
-        st.write(f"Found **{len(results)}** results for *{keyword}*")
-        st.dataframe(results, use_container_width=True)
-    else:
-        st.info("Enter a keyword above to search patent titles")
-        st.subheader("Sample patents")
-        sample = query("SELECT patent_id, title, filing_date, num_claims FROM patents LIMIT 20")
-        st.dataframe(sample, use_container_width=True)
-
-# ── Tab 3: Countries ──────────────────────────────────────
-with tab3:
-    st.subheader("Q3 — Locations by country")
+    st.subheader("Inventor locations by country")
     countries = query("""
         SELECT country, COUNT(*) as locations
         FROM locations
@@ -158,141 +125,141 @@ with tab3:
     col1, col2 = st.columns(2)
     with col1:
         top_n = st.slider("Show top N countries", 5, 50, 15)
-        df = countries.head(top_n)
-        fig = px.bar(df, x='country', y='locations',
-                     labels={'country':'Country','locations':'Inventor locations'},
-                     color='locations', color_continuous_scale='Blues')
-        fig.update_layout(margin=dict(l=0,r=0,t=10,b=0), height=400)
+        fig = px.bar(countries.head(top_n), x='country', y='locations',
+                     color='locations', color_continuous_scale='Blues',
+                     labels={'country':'Country','locations':'Inventor locations'})
+        fig.update_layout(height=400)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
         fig2 = px.pie(countries.head(10), values='locations', names='country',
                       title='Top 10 countries share')
-        fig2.update_layout(margin=dict(l=0,r=0,t=40,b=0), height=400)
+        fig2.update_layout(height=400)
         st.plotly_chart(fig2, use_container_width=True)
 
     st.dataframe(countries, use_container_width=True)
-    countries.to_csv('reports/top_countries.csv', index=False)
 
-# ── Tab 4: Trends ─────────────────────────────────────────
-with tab4:
-    st.subheader("Q4 — Patent trends over time")
-    st.info("Currently showing 2018 sample. Trends will expand once more year files are loaded.")
+# ── Tab 3: Gov Interest ───────────────────────────────────
+with tab3:
+    st.subheader("Patents with government interest")
 
-    trends = query("""
-        SELECT year, COUNT(*) as patents,
-               AVG(num_claims) as avg_claims
-        FROM patents GROUP BY year ORDER BY year
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Total gov interest records", f"{total_gov:,}")
+    with col2:
+        st.metric("Unique patents with gov interest", f"{unique_patents:,}")
+
+    st.subheader("Search gov interest statements")
+    keyword = st.text_input("Filter by keyword", placeholder="e.g. energy, defense, health")
+    if keyword:
+        results = query(f"""
+            SELECT patent_id,
+                   SUBSTR(gi_statement, 1, 200) as gi_summary
+            FROM gov_interest
+            WHERE LOWER(gi_statement) LIKE LOWER('%{keyword}%')
+            LIMIT 100
+        """)
+        st.write(f"**{len(results)}** results for *{keyword}*")
+        st.dataframe(results, use_container_width=True)
+    else:
+        sample = query("""
+            SELECT patent_id, SUBSTR(gi_statement, 1, 150) as gi_summary
+            FROM gov_interest LIMIT 50
+        """)
+        st.dataframe(sample, use_container_width=True)
+
+    st.subheader("Most common gov interest statements")
+    common = query("""
+        SELECT SUBSTR(gi_statement, 1, 80) as statement, COUNT(*) as count
+        FROM gov_interest
+        GROUP BY gi_statement
+        ORDER BY count DESC LIMIT 15
     """)
-
-    fig = px.bar(trends, x='year', y='patents',
-                 labels={'patents':'Patents granted','year':'Year'},
-                 title='Patents granted per year')
-    fig.update_layout(height=350)
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.subheader("Claims distribution")
-    claims = query("SELECT num_claims FROM patents WHERE num_claims IS NOT NULL AND num_claims < 100")
-    fig2 = px.histogram(claims, x='num_claims', nbins=50,
-                        labels={'num_claims':'Number of claims'},
-                        title='Distribution of patent claims')
-    fig2.update_layout(height=300)
-    st.plotly_chart(fig2, use_container_width=True)
-
-# ── Tab 5: Gov interest ───────────────────────────────────
-with tab5:
-    st.subheader("Government interest patents")
-
-    gov_count = query("""
-        SELECT COUNT(DISTINCT p.patent_id) as gov_patents,
-               COUNT(DISTINCT p.patent_id) * 100.0 / (SELECT COUNT(*) FROM patents) as pct
-        FROM patents p JOIN gov_interest g ON p.patent_id = g.patent_id
-    """)
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Gov-linked patents", f"{gov_count.iloc[0,0]:,}")
-    col2.metric("% of total", f"{gov_count.iloc[0,1] or 0:.1f}%")
-    col3.metric("Unique contracts", f"{total_contracts:,}")
-
-    st.subheader("Sample — patents with government interest")
-    gov_patents = query("""
-        SELECT p.patent_id, p.title, p.year, p.num_claims,
-               SUBSTR(g.gi_statement, 1, 120) as gi_summary
-        FROM patents p
-        JOIN gov_interest g ON p.patent_id = g.patent_id
-        LIMIT 50
-    """)
-    st.dataframe(gov_patents, use_container_width=True)
-
-# ── Tab 6: Top patents ────────────────────────────────────
-with tab6:
-    st.subheader("Q7 — Top patents ranked by claims")
-    ranked = query("""
-        SELECT patent_id,
-               title,
-               num_claims,
-               year,
-               RANK() OVER (ORDER BY num_claims DESC) as rank
-        FROM patents
-        WHERE num_claims IS NOT NULL
-        LIMIT 50
-    """)
-    fig = px.bar(ranked.head(20), x='num_claims', y='patent_id',
-                 orientation='h',
-                 hover_data=['title'],
-                 labels={'num_claims':'Number of claims','patent_id':'Patent ID'},
-                 title='Top 20 patents by claim count')
+    fig = px.bar(common, x='count', y='statement', orientation='h',
+                 labels={'count':'Count','statement':'Statement'},
+                 title='Top 15 most repeated gov interest statements')
     fig.update_layout(height=500, yaxis={'categoryorder':'total ascending'})
     st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(ranked, use_container_width=True)
 
-# ── Tab 7: SQL demos ──────────────────────────────────────
-with tab7:
-    st.subheader("SQL query demos — Q1 through Q7")
+# ── Tab 4: Contracts ──────────────────────────────────────
+with tab4:
+    st.subheader("Government contracts linked to patents")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Total contract records", f"{total_contracts:,}")
+    with col2:
+        st.metric("Unique contract award numbers", f"{unique_contracts:,}")
+
+    st.subheader("Patents per contract")
+    per_contract = query("""
+        SELECT contract_award_number, COUNT(*) as patents
+        FROM contracts
+        GROUP BY contract_award_number
+        ORDER BY patents DESC LIMIT 20
+    """)
+    fig = px.bar(per_contract, x='patents', y='contract_award_number',
+                 orientation='h',
+                 labels={'patents':'Patents linked','contract_award_number':'Contract ID'},
+                 title='Top 20 contracts by number of linked patents')
+    fig.update_layout(height=500, yaxis={'categoryorder':'total ascending'})
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("Full contracts table")
+    st.dataframe(
+        query("SELECT * FROM contracts LIMIT 200"),
+        use_container_width=True
+    )
+
+# ── Tab 5: SQL Demos ──────────────────────────────────────
+with tab5:
+    st.subheader("SQL query demos")
 
     queries_map = {
-        "Q1 — Most active years": """
-            SELECT year, COUNT(*) as patents
-            FROM patents GROUP BY year
-            ORDER BY patents DESC LIMIT 10""",
-
-        "Q2 — Top gov interest statements": """
-            SELECT SUBSTR(gi_statement,1,80) as statement, COUNT(*) as count
-            FROM gov_interest
-            GROUP BY gi_statement
-            ORDER BY count DESC LIMIT 10""",
-
-        "Q3 — Top countries": """
+        "Q1 — Top countries by locations": """
             SELECT country, COUNT(*) as locations
             FROM locations
             WHERE country IS NOT NULL
             GROUP BY country ORDER BY locations DESC LIMIT 15""",
 
-        "Q4 — Patent trends by year": """
-            SELECT year, COUNT(*) as patents
-            FROM patents GROUP BY year ORDER BY year""",
+        "Q2 — Most common gov interest statements": """
+            SELECT SUBSTR(gi_statement,1,80) as statement, COUNT(*) as count
+            FROM gov_interest
+            GROUP BY gi_statement
+            ORDER BY count DESC LIMIT 10""",
 
-        "Q5 — JOIN patents + gov interest": """
-            SELECT p.patent_id, SUBSTR(p.title,1,60) as title,
-                   p.year, SUBSTR(g.gi_statement,1,80) as gi_summary
-            FROM patents p
-            JOIN gov_interest g ON p.patent_id = g.patent_id
-            LIMIT 10""",
+        "Q3 — Patents with contracts": """
+            SELECT patent_id, COUNT(*) as num_contracts
+            FROM contracts
+            GROUP BY patent_id
+            ORDER BY num_contracts DESC LIMIT 15""",
 
-        "Q6 — CTE with running total": """
-            WITH yearly AS (
-                SELECT year, COUNT(*) as patents
-                FROM patents GROUP BY year
-            )
-            SELECT year, patents,
-                   SUM(patents) OVER (ORDER BY year) as running_total
-            FROM yearly ORDER BY year""",
+        "Q4 — JOIN gov interest + contracts": """
+            SELECT g.patent_id,
+                   SUBSTR(g.gi_statement,1,80) as gi_summary,
+                   c.contract_award_number
+            FROM gov_interest g
+            JOIN contracts c ON g.patent_id = c.patent_id
+            LIMIT 20""",
 
-        "Q7 — Ranking by num_claims": """
-            SELECT patent_id, SUBSTR(title,1,50) as title,
-                   num_claims, year,
-                   RANK() OVER (ORDER BY num_claims DESC) as rank
-            FROM patents
-            WHERE num_claims IS NOT NULL LIMIT 15""",
+        "Q5 — Cities with most locations": """
+            SELECT city, country, COUNT(*) as count
+            FROM locations
+            WHERE city IS NOT NULL AND city != ''
+            GROUP BY city, country
+            ORDER BY count DESC LIMIT 15""",
+
+        "Q6 — CTE: patents in both tables": """
+            WITH gov AS (SELECT DISTINCT patent_id FROM gov_interest),
+                 con AS (SELECT DISTINCT patent_id FROM contracts)
+            SELECT COUNT(*) as in_both
+            FROM gov JOIN con ON gov.patent_id = con.patent_id""",
+
+        "Q7 — US states with most locations": """
+            SELECT state, COUNT(*) as locations
+            FROM locations
+            WHERE country = 'US' AND state IS NOT NULL
+            GROUP BY state ORDER BY locations DESC LIMIT 15""",
     }
 
     selected = st.selectbox("Choose a query", list(queries_map.keys()))
@@ -305,6 +272,3 @@ with tab7:
         result.to_csv(index=False),
         file_name=f"{selected[:20].replace(' ','_')}.csv"
     )
-
-# EOF
-
