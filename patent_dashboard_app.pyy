@@ -1,0 +1,39 @@
+
+# import streamlit as st
+# import pandas as pd
+# import sqlite3
+# import plotly.express as px
+
+# st.set_page_config(page_title="Patent Dashboard", layout="wide")
+
+# st.title("🌍 Global Patent Intelligence Dashboard")
+
+# # Load CSV files
+# trend = pd.read_csv("country_trends.csv")
+# inventors = pd.read_csv("top_inventors.csv")
+# companies = pd.read_csv("top_companies.csv")
+
+# # Metrics
+# col1, col2, col3 = st.columns(3)
+
+# with col1:
+#     st.metric("Years Covered", trend["year"].nunique())
+
+# with col2:
+#     st.metric("Top Inventors", len(inventors))
+
+# with col3:
+#     st.metric("Top Companies", len(companies))
+
+# # Trend chart
+# st.subheader("📈 Patent Trends")
+# fig = px.line(trend, x="year", y="patents")
+# st.plotly_chart(fig, use_container_width=True)
+
+# # Inventors
+# st.subheader("🏆 Top Inventors")
+# st.dataframe(inventors)
+
+# # Companies
+# st.subheader("🏢 Top Companies")
+# st.dataframe(companies)
