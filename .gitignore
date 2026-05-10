@@ -1,12 +1,9 @@
-.virtual_documents/
-**pycache**/
+__pycache__/
 *.pyc
 *.zip
-data/raw
-data/
+
+# Ignore raw/source data only
+data/raw/
+
+# Ignore databases
 *.db
-*.csv
-data/
-*.db
-*.csv
-data/clean/
