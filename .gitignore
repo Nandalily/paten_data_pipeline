@@ -6,3 +6,4 @@ __pycache__/
 data/raw/
 data/clean_backup/
 .virtual_documents/
+data/clean/clean_patents.csv
