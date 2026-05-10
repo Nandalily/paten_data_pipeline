@@ -6,8 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 import os
-if not os.path.exists("patents.db"):
-    import etl  # or subprocess.run(["python", "etl.py"])
+# if not os.path.exists("patents.db"):
+#     import etl  # or subprocess.run(["python", "etl.py"])
 
 st.set_page_config(
     page_title="Global Patent Intelligence",
@@ -15,13 +15,29 @@ st.set_page_config(
     layout="wide"
 )
 
-@st.cache_resource
-def get_conn():
-    return sqlite3.connect('patents.db', check_same_thread=False)
+# @st.cache_resource
+# def get_conn():
+#     return sqlite3.connect('patents.db', check_same_thread=False)
+
+# @st.cache_data
+# def query(sql):
+#     return pd.read_sql(sql, get_conn())
+@st.cache_data
+def load_data():
+    patents    = pd.read_csv("data/clean/clean_patents.csv")
+    locations  = pd.read_csv("data/clean/clean_locations.csv")
+    gov        = pd.read_csv("data/clean/clean_gov_interest.csv")
+    contracts  = pd.read_csv("data/clean/clean_contracts.csv")
+    return patents, locations, gov, contracts
+
+patents_df, locations_df, gov_df, contracts_df = load_data()
+
+# Lightweight in-memory SQL via DuckDB
+import duckdb
 
 @st.cache_data
 def query(sql):
-    return pd.read_sql(sql, get_conn())
+    return duckdb.query(sql).df()
 
 # ── Header ────────────────────────────────────────────────
 st.title("Global Patent Intelligence")
