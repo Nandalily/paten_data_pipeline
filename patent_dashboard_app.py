@@ -5,6 +5,9 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import json
+import os
+if not os.path.exists("patents.db"):
+    import etl  # or subprocess.run(["python", "etl.py"])
 
 st.set_page_config(
     page_title="Global Patent Intelligence",
